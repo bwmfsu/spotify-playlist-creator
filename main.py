@@ -13,9 +13,9 @@ client_secret = os.getenv('spotify_client_secret')
 bearer_token = os.getenv('spotify_bearer_token')
 playlist_id = os.getenv('spotify_playlist_id')
 
-if not all([client_id, client_secret, bearer_token]):
+if not all([client_id, client_secret, bearer_token, playlist_id]):
     raise EnvironmentError(
-        'The environment variables client_id, client_secret, and bearer_token must be set'
+        'The environment variables client_id, client_secret, bearer_token, and playlist_id must be set.'
     )
 
 # def get_authorization_token():
@@ -76,17 +76,21 @@ def get_artist_top_tracks(artist_id):
 
 
 def add_to_playlist(playlist_id, track_uris):
-    response = requests.post(
-        f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
-        headers={
-            'Authorization': f'Bearer {bearer_token}',
-            'Content-Type': 'application/json'
-        },
-        json={
-            "uris": track_uris,
-            "position": 0
-        }
-    )
+    try:
+        response = requests.post(
+            f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
+            headers={
+                'Authorization': f'Bearer {bearer_token}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                "uris": track_uris,
+                "position": 0
+            }
+        )
+    except requests.exceptions.HTTPError as err:
+        logging.error(f'An http error occured: {err}')
+        raise
 
 
 def get_artists_config(config_file_path):
@@ -135,10 +139,9 @@ if '__main__' == __name__:
     ]
 
     # get tracks, update playlist
-    track_uris = [
-        track['uri']
-        for artist in artists_data if 'top_tracks' in artists_data
-        for track in get_artist_track_selection(artist['top_tracks'], sample_size)
-    ]
-
-    add_to_playlist(playlist_id, track_uris)
+    for artist in artists_data:
+        if 'top_tracks' in artist:
+            track_uris = [
+                track['uri'] for track in get_artist_track_selection(artist['top_tracks'], sample_size)
+            ]
+            add_to_playlist(playlist_id, track_uris)
