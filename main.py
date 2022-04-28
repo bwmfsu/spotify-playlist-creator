@@ -63,8 +63,6 @@ def get_artist(artist_name):
 
 
 def get_artist_top_tracks(artist_id):
-    # GET https://api.spotify.com/v1/artists/{artist_id}/top-tracks?market=US
-    # tracks[]/id,name,uri
     top_tracks = perform_spotify_get_request(
         f'https://api.spotify.com/v1/artists/{artist_id}/top-tracks?market=US'
     )
