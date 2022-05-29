@@ -8,8 +8,6 @@ import requests
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
-print(os.environ)
-
 client_id = os.getenv('spotify_client_id')
 client_secret = os.getenv('spotify_client_secret')
 bearer_token = os.getenv('spotify_bearer_token')
